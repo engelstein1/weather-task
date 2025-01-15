@@ -156,11 +156,12 @@ def process_weather_data(weather_data: Dict[str, Any]) -> bool:
                     logger.error(f"Failed to insert hourly weather for {day['datetime']} {hour['datetime']}")
 
         return True
-        
+
 
     except Exception as e:
         logger.error(f"Error processing weather data: {e}")
         return False
+        
 
 def import_weather_from_file(file_path: str) -> bool:
     """Import weather data from a JSON file into the database"""
