@@ -1,11 +1,23 @@
 FROM python:3.9-slim
 
+LABEL maintainer="Weather Service"
+LABEL description="Weather Data Service for Azure Interview Task"
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
 WORKDIR /app
 
 COPY requirements.txt .
-COPY app.py .
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip install -r requirements.txt
+COPY app.py .
+COPY api.py .
+COPY weather_analytics.py .
+COPY database ./database
+
+RUN adduser --disabled-password --gecos "" appuser
+USER appuser
 
 EXPOSE 8000
 
