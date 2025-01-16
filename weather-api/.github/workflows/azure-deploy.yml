@@ -1,3 +1,4 @@
+# Workflow test
 name: Deploy to Azure AKS
 
 on:
@@ -47,3 +48,4 @@ jobs:
         kubectl apply -f k8s/secret.yaml
         kubectl apply -f k8s/deployment.yaml
         kubectl apply -f k8s/service.yaml
+# Workflow test
