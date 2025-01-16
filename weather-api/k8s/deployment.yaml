@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: weather-app
+  template:
+    metadata:
+      labels:
+        app: weather-app
+    spec:
+      containers:
+      - name: weather-app
+        image: weatherdataacr2025.azurecr.io/weather-app:v1
+        ports:
+        - containerPort: 8000
+        env:
+        - name: HOST
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: HOST
+        - name: PORT
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: PORT
+        - name: DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: DATABASE
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: DB_USER
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: PASSWORD
