@@ -1,7 +1,8 @@
-
-from .execute_queries import execute_query
-from .weather_import import get_weather_data
 import logging
+
+from .db_executor import execute_query
+from src.services.weather_data_service import get_weather_data
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -69,9 +70,6 @@ def create_tables():
     
     logger.error("Database initialization failed!")
     return False
-
-# if __name__ == "__main__":
-#     initialize_database()
 
 def initialize_database():
     if create_tables():

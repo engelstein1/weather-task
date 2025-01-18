@@ -1,13 +1,14 @@
-
-from fastapi import APIRouter
-from database.create_tables import initialize_database
 import logging
-from fastapi import HTTPException, Depends
 from typing import Dict
-from database.db_connection import get_connection
-from weather_analytics import WeatherAnalytics
+
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from fastapi import APIRouter, HTTPException, Depends
+
+from src.database.db_initializer import initialize_database
+from src.database.connection import get_connection
+from src.services.weather_analytics_service import WeatherAnalytics  
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -130,5 +131,5 @@ async def health_check(conn = Depends(get_db)) -> Dict:
 async def startup_event():
     if not initialize_database():
         logging.error("Failed to initialize database!")
-        return {"message": "The init failed!"}
+        raise HTTPException(status_code=500, detail="Database initialization failed")
     return {"message": "The init succeeded!"}

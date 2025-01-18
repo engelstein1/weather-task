@@ -1,7 +1,9 @@
-import psycopg2
-from dotenv import load_dotenv
-import os
 import logging
+import os
+
+from dotenv import load_dotenv
+import psycopg2
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

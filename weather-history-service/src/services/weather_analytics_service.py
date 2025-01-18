@@ -1,5 +1,7 @@
 import logging
+
 from psycopg2.extras import RealDictCursor
+
 
 class WeatherAnalytics:
     def __init__(self, db_connection):

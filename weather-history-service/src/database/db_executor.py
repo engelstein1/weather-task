@@ -1,5 +1,7 @@
-from .db_connection import get_connection
 import logging
+
+from .connection import get_connection
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

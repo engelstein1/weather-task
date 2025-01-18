@@ -1,12 +1,12 @@
 import json
 import logging
 import os
-from pathlib import Path
-from typing import Dict, Any
-from dotenv import load_dotenv
-from .db_connection import get_connection
 import urllib.request
-import sys
+from typing import Dict, Any
+
+from dotenv import load_dotenv
+
+from src.database.connection import get_connection
 
 
 logging.basicConfig(level=logging.INFO)
@@ -20,7 +20,6 @@ def insert_location(weather_data: Dict[str, Any]) -> int:
     try:
         cursor = connection.cursor()
         
-        # Check if location exists
         cursor.execute(
             "SELECT location_id FROM locations WHERE city_name = %s",
             (weather_data['resolvedAddress'],)
@@ -30,7 +29,6 @@ def insert_location(weather_data: Dict[str, Any]) -> int:
         if existing_location:
             return existing_location[0]
             
-        # Insert new location
         query = """
         INSERT INTO locations (city_name, latitude, longitude, timezone)
         VALUES (%s, %s, %s, %s)
@@ -62,7 +60,6 @@ def insert_daily_weather(location_id: int, day_data: Dict[str, Any]) -> tuple[in
     try:
         cursor = connection.cursor()
         
-        # Check if daily record exists
         cursor.execute(
             "SELECT daily_id FROM daily_weather WHERE location_id = %s AND date = %s",
             (location_id, day_data['datetime'])
@@ -70,8 +67,7 @@ def insert_daily_weather(location_id: int, day_data: Dict[str, Any]) -> tuple[in
         existing_daily = cursor.fetchone()
         
         if existing_daily:
-            return existing_daily[0], False  # Return ID and False for existing record
-        
+            return existing_daily[0], False  
         query = """
         INSERT INTO daily_weather (
             location_id, date, temp_max, temp_min, humidity,
@@ -98,7 +94,7 @@ def insert_daily_weather(location_id: int, day_data: Dict[str, Any]) -> tuple[in
         ))
         daily_id = cursor.fetchone()[0]
         connection.commit()
-        return daily_id, True  # Return ID and True for new record
+        return daily_id, True  
 
     except Exception as e:
         logger.error(f"Error inserting daily weather: {e}")
@@ -114,7 +110,6 @@ def insert_hourly_weather(daily_id: int, date: str,hours_data: list) -> bool:
     try:
         cursor = connection.cursor()
         
-        # Prepare the list of tuples for all hours of the day
         query = """
         INSERT INTO hourly_weather (
             daily_id, datetime, temp, humidity, wind_speed,
@@ -123,11 +118,10 @@ def insert_hourly_weather(daily_id: int, date: str,hours_data: list) -> bool:
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
         """
         
-        # Prepare the data for all hours
         data_to_insert = [
             (
                 daily_id,
-                f"{date} {hour['datetime']}",  # Combine date and time
+                f"{date} {hour['datetime']}",  
                 hour['temp'],
                 hour['humidity'],
                 hour['windspeed'],
@@ -139,7 +133,6 @@ def insert_hourly_weather(daily_id: int, date: str,hours_data: list) -> bool:
             for hour in hours_data
         ]
         
-        # Use executemany for bulk insertion
         cursor.executemany(query, data_to_insert)
         connection.commit()
         return True
@@ -166,10 +159,8 @@ def process_weather_data(weather_data: Dict[str, Any]) -> bool:
                 
             logger.info(f"Processing new daily weather for {day['datetime']}")
             
-            # Gather all hourly data for the day
             hourly_data = day['hours']
             
-            # Insert all hourly weather data in bulk for the day
             if not insert_hourly_weather(daily_id,day['datetime'],hourly_data):
                 logger.error(f"Failed to insert hourly weather for {day['datetime']}")
 
@@ -181,22 +172,23 @@ def process_weather_data(weather_data: Dict[str, Any]) -> bool:
 
 
 def get_weather_data():
-    print('hi')
+
     # api_key = "os.getenv("API_KEY_WEATHER")"
     api_key = os.getenv("API_KEY_WEATHER2")
 
-    url = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/Los%20angeles/last30days?unitGroup=metric&key={api_key}&contentType=json"
-    
+    url = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/Los%20angeles/tomorrow?unitGroup=metric&key={api_key}&contentType=json"
     try:
         ResultBytes = urllib.request.urlopen(url)
         weather_data = json.load(ResultBytes)
-
-        print(weather_data)
         return process_weather_data(weather_data)
     
-    except urllib.error.HTTPError  as e:
-        ErrorInfo= e.read().decode() 
-        logger.error(f"Error processing weather data: {e}")
-        print('Error code: ', e.code, ErrorInfo)
-        sys.exit()
+    except urllib.error.HTTPError as e:
+        error_info = e.read().decode() 
+        logger.error(f"HTTP Error fetching weather data: {e.code} - {error_info}")
+        return False
+    except json.JSONDecodeError as e:
+        logger.error(f"Error decoding JSON response: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"Unexpected error fetching weather data: {e}")
         return False
