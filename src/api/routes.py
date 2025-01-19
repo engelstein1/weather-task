@@ -31,7 +31,7 @@ def get_analytics(conn = Depends(get_db)):
 
 @router.get("/")
 async def check_connection():
-    return {"message": "Welcome to Weather API"}
+    return {"message": "Welcome Azure"}
 
 
 @router.get("/weather/extremes/{city}/{parameter}")
