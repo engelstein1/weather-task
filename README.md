@@ -211,6 +211,17 @@ Example:
 # Get average humidity for all available dates
 GET /weather/average/Los%20Angeles/humidity
 ```
+## API Documentation
+
+The interactive API documentation can be accessed at:
+
+Local Development:
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+Azure Deployment:
+- Swagger UI: `http://<your-azure-ip>/docs`
+- ReDoc: `http://<your-azure-ip>/redoc`
 
 ## Implementation Details
 
