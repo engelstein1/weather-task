@@ -32,9 +32,15 @@ jobs:
     
     - name: Build and Push Docker Image
       run: |
-        docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/weather-app:${{ github.sha }} .
-        docker push ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/weather-app:${{ github.sha }}
+        VERSION_TAG=$(date +%Y%m%d-%H%M%S)
+        docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/weather-app:$VERSION_TAG .
+        docker tag ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/weather-app:$VERSION_TAG ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/weather-app:${{ github.sha }}
+        docker tag ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/weather-app:$VERSION_TAG ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/weather-app:latest
         
+        docker push ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/weather-app:$VERSION_TAG
+        docker push ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/weather-app:${{ github.sha }}
+        docker push ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/weather-app:latest
+            
     - name: Set AKS Context
       uses: azure/aks-set-context@v1
       with:
