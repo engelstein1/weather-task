@@ -140,7 +140,6 @@ async def get_average(
                 "start_date": start_date,
                 "end_date": end_date
             })
-            
         return response
 
     except psycopg2.Error as e:
