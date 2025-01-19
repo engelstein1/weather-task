@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 def insert_location(weather_data: Dict[str, Any]) -> int:
-    """Insert location data and return the location_id"""
     connection = get_connection()
     try:
         cursor = connection.cursor()
@@ -52,10 +51,6 @@ def insert_location(weather_data: Dict[str, Any]) -> int:
         connection.close()
 
 def insert_daily_weather(location_id: int, day_data: Dict[str, Any]) -> tuple[int, bool]:
-    """
-    Insert daily weather data and return (daily_id, is_new_record)
-    Returns the daily_id and whether this was a new insert
-    """
     connection = get_connection()
     try:
         cursor = connection.cursor()
@@ -105,7 +100,6 @@ def insert_daily_weather(location_id: int, day_data: Dict[str, Any]) -> tuple[in
 
 
 def insert_hourly_weather(daily_id: int, date: str,hours_data: list) -> bool:
-    """Insert hourly weather data in bulk for a single day"""
     connection = get_connection()
     try:
         cursor = connection.cursor()
@@ -178,8 +172,8 @@ def get_weather_data():
 
     url = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/Los%20angeles/last30days?unitGroup=metric&key={api_key}&contentType=json"
     try:
-        ResultBytes = urllib.request.urlopen(url)
-        weather_data = json.load(ResultBytes)
+        result_bytes = urllib.request.urlopen(url)
+        weather_data = json.load(result_bytes)
         return process_weather_data(weather_data)
     
     except urllib.error.HTTPError as e:

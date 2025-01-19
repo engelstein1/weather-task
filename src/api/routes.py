@@ -26,12 +26,46 @@ def get_db():
     finally:
         conn.close()
 
-def get_analytics(conn = Depends(get_db)):
-    return WeatherAnalytics(conn)
 
 @router.get("/")
 async def check_connection():
-    return {"message": "Welcome to Weather API "}
+    return {"message": "Welcome to Weather API (Visual Crossing)"}
+
+
+@router.get("/health")
+async def health_check(conn = Depends(get_db)) -> Dict:
+    """Check if the API and database are healthy"""
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+            return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        raise HTTPException(status_code=500, detail="System unhealthy")
+    
+    
+@router.get("/cities")
+async def get_cities(conn = Depends(get_db)):
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("SELECT city_name FROM locations ORDER BY city_name")
+            cities = [row['city_name'] for row in cur]
+            if not cities:
+                raise HTTPException(
+                    status_code=404, 
+                    detail="No cities found in database"
+                )
+            return {"cities": cities}
+    except psycopg2.Error as e:
+        logger.error(f"Database error in get_cities: {e}")
+        raise HTTPException(status_code=500, detail=f"Database error occurred: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error in get_cities: {e}")
+        raise HTTPException(status_code=500, detail=f"Error occurred: {str(e)}")
+    
+    
+def get_analytics(conn = Depends(get_db)):
+    return WeatherAnalytics(conn)
 
 
 @router.get("/weather/extremes/{city}/{parameter}")
@@ -42,15 +76,6 @@ async def get_extremes(
     end_date: Optional[str] = Query(None, description="End date in YYYY-MM-DD format"),
     analytics: WeatherAnalytics = Depends(get_analytics)
 ) -> Dict:
-    """
-    Get min and max values for a weather parameter in a city, optionally within a date range
-    
-    Parameters:
-    - city: City name
-    - parameter: Weather parameter (temp_max, temp_min, humidity, etc.)
-    - start_date: Optional start date (YYYY-MM-DD)
-    - end_date: Optional end date (YYYY-MM-DD)
-    """
     try:
         if (start_date and not end_date) or (end_date and not start_date):
             raise HTTPException(
@@ -91,6 +116,7 @@ async def get_extremes(
     except Exception as e:
         logger.error(f"Error in get_extremes: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    
 
 @router.get("/weather/average/{city}/{parameter}")
 async def get_average(
@@ -100,15 +126,6 @@ async def get_average(
     end_date: Optional[str] = Query(None, description="End date in YYYY-MM-DD format"),
     analytics: WeatherAnalytics = Depends(get_analytics)
 ) -> Dict:
-    """
-    Get average value for a weather parameter in a city, optionally within a date range
-    
-    Parameters:
-    - city: City name
-    - parameter: Weather parameter (temp_max, temp_min, humidity, etc.)
-    - start_date: Optional start date (YYYY-MM-DD)
-    - end_date: Optional end date (YYYY-MM-DD)
-    """
     try:
         if (start_date and not end_date) or (end_date and not start_date):
             raise HTTPException(
@@ -149,6 +166,7 @@ async def get_average(
         logger.error(f"Error in get_average: {e}")
         raise HTTPException(status_code=500, detail=str(e))
     
+    
 @router.get("/cities")
 async def get_cities(conn = Depends(get_db)):
     """Get list of available cities"""
@@ -168,33 +186,17 @@ async def get_cities(conn = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error in get_cities: {e}")
         raise HTTPException(status_code=500, detail=f"Error occurred: {str(e)}")
-
-@router.get("/health")
-async def health_check(conn = Depends(get_db)) -> Dict:
-    """Check if the API and database are healthy"""
-    try:
-        with conn.cursor() as cur:
-            cur.execute("SELECT 1")
-            return {"status": "healthy", "database": "connected"}
-    except Exception as e:
-        logger.error(f"Health check failed: {e}")
-        raise HTTPException(status_code=500, detail="System unhealthy")
     
 
 def get_fire_analytics(conn = Depends(get_db)):
     return FireDangerAnalytics(conn)
+
 
 @router.get("/weather/fire-danger/{city}")
 async def get_fire_danger(
     city: str,
     fire_analytics: FireDangerAnalytics = Depends(get_fire_analytics)
 ) -> Dict:
-    """
-    Get fire danger ratings for all days in a city
-    
-    Parameters:
-    - city: City name
-    """
     try:
         result = fire_analytics.get_fire_danger_by_date(city)
         if not result:
@@ -206,18 +208,13 @@ async def get_fire_danger(
     except Exception as e:
         logger.error(f"Error in get_fire_danger: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    
 
 @router.get("/weather/high-fire-risk/{city}")
 async def get_high_risk_days(
     city: str,
     fire_analytics: FireDangerAnalytics = Depends(get_fire_analytics)
 ) -> Dict:
-    """
-    Get only high risk fire danger days for a city
-    
-    Parameters:
-    - city: City name
-    """
     try:
         result = fire_analytics.get_high_risk_days(city)
         if not result:
@@ -228,7 +225,8 @@ async def get_high_risk_days(
         return {"city": city, "high_risk_days": result}
     except Exception as e:
         logger.error(f"Error in get_high_risk_days: {e}")
-        raise HTTPException(status_code=500, detail=str(e))    
+        raise HTTPException(status_code=500, detail=str(e))  
+      
 
 @router.put("/init")
 async def startup_event():
