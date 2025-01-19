@@ -7,6 +7,14 @@ A robust weather data service that currently imports and analyzes weather data f
 
 Los Angeles was specifically chosen as the initial city for this service due to the recent wildfires in Southern California, including significant fire activity in the LA and California region over the past two weeks. This makes the fire danger analytics feature particularly relevant and showcases practical application of weather data analysis for public safety.
 
+## Project Overview
+
+- Collects weather data using the VisualCrossing Weather API
+- Stores data in a PostgreSQL database
+- Runs in Azure Kubernetes Service (AKS)
+- Provides REST API endpoints for weather data analysis
+- Implements CI/CD using GitHub Actions
+
 ## Features
 
 - Imports weather data for Los Angeles using Visual Crossing Weather API
@@ -42,7 +50,7 @@ Los Angeles was specifically chosen as the initial city for this service due to 
 1. Clone the repository
 ```bash
 git clone https://github.com/engelstein1/weather-task.git
-cd weather-history-service
+cd weather-task
 ```
 
 2. Create and activate virtual environment
@@ -70,7 +78,7 @@ API_KEY_WEATHER=your_visual_crossing_api_key
 
 5. Run the application
 ```bash
-uvicorn app:app --reload
+uvicorn src.main:app --reload
 ```
 
 ## Docker Setup
@@ -116,6 +124,19 @@ kubectl apply -f k8s/secret.yaml
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
 ```
+
+### GitHub Actions CI/CD
+The project includes a GitHub Actions workflow that automatically:
+
+Builds the Docker image
+Pushes to Azure Container Registry
+Deploys to AKS
+
+Add the required GitHub Secrets in your repository settings. You can do this through the GitHub web interface by navigating to your repository's "Settings" > "Secrets" > "Actions" and adding the following secrets:
+
+* AZURE_CREDENTIALS
+* REGISTRY_USERNAME
+* REGISTRY_PASSWORD
 
 ## API Endpoints
 
@@ -210,13 +231,22 @@ Weather data is imported from Visual Crossing Weather API. The import process:
 ### Data Analysis Features
 
 The service provides various analytical capabilities:
-- Min/max values for weather parameters
-- Average calculations with optional date ranges
-- Historical data tracking
-- Full data range or specific period analysis
-- Fire danger analysis including:
-  - Daily fire danger ratings based on weather conditions
-  - High-risk day identification
+
+Min/max values for weather parameters
+Average calculations with optional date ranges
+Full data range or specific period analysis
+Fire danger analysis including:
+Daily fire danger ratings based on weather conditions:
+Fire danger ratings: Low, Moderate, High, Extreme
+Danger increases with:
+High temperatures (>35°C is Extreme risk)
+Strong winds (>35 km/h is Extreme risk)
+Low humidity (<30% is Extreme risk)
+Lack of precipitation
+High-risk day identification:
+Identifies specific dates with elevated fire danger.
+Example: The API identified January 7-8 as High risk days for Los Angeles. In reality, a destructive wildfire began spreading in the area on the night of January 7, showcasing the potential of weather-based analytics for early fire warnings.
+
 
 ## Security Considerations
 
@@ -240,7 +270,6 @@ The deployment includes:
 - Implement caching
 - Add more analytical features
 - Set up automated testing
-- Implement CI/CD pipeline
 
 ## Author
 
