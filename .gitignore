@@ -1,12 +1,11 @@
 **/__pycache__/
 *.py[cod]
+*.cpython-*.py
 .Python
 
-# Environment files
 .env
 .env.*
 venv/
 
-# IDE
 .vscode/
 .idea/

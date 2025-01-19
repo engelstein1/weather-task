@@ -232,7 +232,9 @@ async def get_high_risk_days(
 
 @router.put("/init")
 async def startup_event():
-    if not initialize_database():
-        logging.error("Failed to initialize database!")
+    try:
+        initialize_database()
+        return {"message": "Database initialization completed successfully"}
+    except Exception as e:
+        logging.error(f"Failed to initialize database: {str(e)}")
         raise HTTPException(status_code=500, detail="Database initialization failed")
-    return {"message": "The init succeeded!"}
