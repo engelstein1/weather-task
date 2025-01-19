@@ -1,6 +1,0 @@
-{
-    "python.analysis.extraPaths": [
-        "./weather-api/database",
-        "./weather-api"
-    ]
-}
