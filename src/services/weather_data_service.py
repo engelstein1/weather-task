@@ -173,10 +173,10 @@ def process_weather_data(weather_data: Dict[str, Any]) -> bool:
 
 def get_weather_data():
 
-    # api_key = "os.getenv("API_KEY_WEATHER")"
-    api_key = os.getenv("API_KEY_WEATHER2")
+    api_key = os.getenv("API_KEY_WEATHER")
+    # api_key = os.getenv("API_KEY_WEATHER2")
 
-    url = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/Los%20angeles/tomorrow?unitGroup=metric&key={api_key}&contentType=json"
+    url = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/Los%20angeles/last30days?unitGroup=metric&key={api_key}&contentType=json"
     try:
         ResultBytes = urllib.request.urlopen(url)
         weather_data = json.load(ResultBytes)
