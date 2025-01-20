@@ -161,7 +161,7 @@ Example responses:
 ```json
 // Fire danger ratings
 {
-    "city": "Los Angeles",
+    "city": "Los Angeles, CA, United States",
     "fire_danger_ratings": [
         {
             "date": "2024-01-01",
@@ -173,7 +173,7 @@ Example responses:
 
 // High risk days
 {
-    "city": "Los Angeles",
+    "city": "Los Angeles, CA, United States",
     "high_risk_days": [
         {
             "date": "2024-01-15",
@@ -211,6 +211,27 @@ Example:
 # Get average humidity for all available dates
 GET /weather/average/Los%20Angeles/humidity
 ```
+### Important Notes
+
+#### City Name Format
+When making API calls, the city name must be provided in the following format:
+`City, State, Country`
+
+Example: `Los Angeles, CA, United States`
+
+#### Available Parameters
+The following parameters can be used in the API endpoints:
+- `temp_max`: Maximum temperature (°C)
+- `temp_min`: Minimum temperature (°C)
+- `humidity`: Relative humidity (%)
+- `wind_speed`: Wind speed (km/h)
+- `wind_gust`: Wind gust speed (km/h)
+- `wind_dir`: Wind direction (degrees)
+- `precipitation`: Precipitation amount (mm)
+- `uv_index`: UV index
+- `cloud_cover`: Cloud coverage (%)
+- `dew`: Dew point (°C)
+
 ## API Documentation
 
 The interactive API documentation can be accessed at:
